@@ -4,7 +4,8 @@ import logging
 from io import BytesIO
 from src.obfuscator_json import obfuscator_json
 from src.obfuscator_csv import obfuscator_csv
-from src.obfuscator_parquet import obfuscator_parquet 
+from src.obfuscator_parquet import obfuscator_parquet
+from utils.get_file_content import get_file_content
 
 
 logging.basicConfig(
@@ -68,8 +69,13 @@ def obfuscator_main(json_str: str) -> BytesIO:
         logger.error(f"no file format was found")
         raise AttributeError()
 
+    #fetching the file format from capture group
     file_format = match_.group(1)
 
+
+    #retreiving file content
+    file_content = get_file_content()
+    
 
     #dynamically invoke a function from router dict
     if file_format in router:
