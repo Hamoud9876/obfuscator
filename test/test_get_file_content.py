@@ -54,14 +54,14 @@ def test_raises_error(boto_mock, caplog, create_data):
 
 
 @patch("utils.get_file_content.re.compile")
-def test_no_match_found(boto_mock, caplog,create_data):
+def test_no_match_found(pattern_mock, caplog,create_data):
     f_location = create_data
 
     caplog.set_level(logging.INFO)
     
     my_mock = MagicMock()
     my_mock.match.return_value = None
-    boto_mock.return_value = my_mock
+    pattern_mock.return_value = my_mock
 
 
     response = get_file_content(f_location)
