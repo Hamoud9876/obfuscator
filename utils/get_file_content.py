@@ -63,7 +63,6 @@ def get_file_content(flocation: str) -> Optional[StreamingBody]:
 
 
     except Exception as e:
-        # logger.error(f"Something went wrong,{type(e).__name__}: {e}")
         logger.error(f"Failed to retrieve S3 object {bucket}/{key}", exc_info=True)
         return None
 
