@@ -1,6 +1,9 @@
 import re
 import logging
 import boto3
+from typing import Optional
+from botocore.response import StreamingBody
+
 
 logging.basicConfig(
     filename="app.log",
@@ -11,7 +14,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_file_content(flocation: str) -> dict:
+def get_file_content(flocation: str) -> Optional[StreamingBody]:
     """
     retrieve file content from the bucket
 
@@ -19,14 +22,14 @@ def get_file_content(flocation: str) -> dict:
         flocation: url of the file in s3 bucket
 
     Return:
-        dataframe contaning the file content if file found
-        returns -1 if failed to retrieve any content
+        boto StreamingBody contaning the file content if file found
+        returns None if failed at any point
     """
 
     #checking if the input is of type string
     if not isinstance(flocation,str):
-        logger.info("wrong input type for 'flocation'")
-        return -1
+        logger.warning("wrong input type for 'flocation'")
+        return None
 
 
     
@@ -38,8 +41,8 @@ def get_file_content(flocation: str) -> dict:
     
     #ruling out AttributeError if no match found
     if not match_:
-        logger.error(f"Invalid S3 URL: {flocation}")
-        return -1
+        logger.warning(f"Invalid S3 URL: {flocation}")
+        return None
 
 
     #getting bucket name and key from the capture groups
@@ -60,8 +63,9 @@ def get_file_content(flocation: str) -> dict:
 
 
     except Exception as e:
-        logger.error(f"Something went wrong,{type(e).__name__}: {e}")
-        return -1
+        # logger.error(f"Something went wrong,{type(e).__name__}: {e}")
+        logger.error(f"Failed to retrieve S3 object {bucket}/{key}", exc_info=True)
+        return None
 
 
-    return s3_response
+    return s3_response["Body"]
