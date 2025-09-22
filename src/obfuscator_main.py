@@ -2,13 +2,19 @@ import json
 import re
 import logging
 from io import BytesIO
-from utils.obfuscator_json import obfuscator_json
-from utils.obfuscator_csv import obfuscator_csv
-from utils.obfuscator_parquet import obfuscator_parquet 
+from src.obfuscator_json import obfuscator_json
+from src.obfuscator_csv import obfuscator_csv
+from src.obfuscator_parquet import obfuscator_parquet 
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.basicConfig(
+    filename="app.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    force=True
+)
+
+logger = logging.getLogger(__name__)
 
 
 def obfuscator_main(json_str: str) -> BytesIO:
@@ -24,7 +30,7 @@ def obfuscator_main(json_str: str) -> BytesIO:
 
         expected structure:
         {
-            "file_to_be_obfuscater": "s3://file/key/in/the/bucket.(fileformat)",
+            "file_to_be_obfuscater": "s3://key/in/bucket.(fileformat)",
             "pii_fields: ["list","of", "fields","to","obfuscator]
         }
 
@@ -55,8 +61,14 @@ def obfuscator_main(json_str: str) -> BytesIO:
     
     #RegEx pattern to find any file format
     pattern = re.compile(r"\.([a-zA-Z0-9]+)$")
-    match = pattern.search(json_payload['file_to_obfuscator'])
-    file_format = match.group(1)
+    match_ = pattern.search(json_payload['file_to_obfuscator'])
+
+    ##ruling out AttributeError if no match found
+    if not match_:
+        logger.error(f"no file format was found")
+        raise AttributeError()
+
+    file_format = match_.group(1)
 
 
     #dynamically invoke a function from router dict
