@@ -19,7 +19,7 @@ def test_handles_wrong_input(caplog):
     response  = get_file_content(1)
 
     assert "wrong input type for 'flocation'" in caplog.text
-    assert response == -1
+    assert response == None
 
 @patch("utils.get_file_content.boto3.client")
 def test_return_dict(boto_mock, create_data):
@@ -49,7 +49,7 @@ def test_raises_error(boto_mock, caplog, create_data):
 
     response = get_file_content(f_location)
 
-    assert response == -1
+    assert response == None
     assert "Something went wrong,Exception: some error" in caplog.text
 
 
@@ -67,5 +67,5 @@ def test_no_match_found(pattern_mock, caplog,create_data):
     response = get_file_content(f_location)
 
 
-    assert response == -1
+    assert response == None
     assert "Invalid S3 URL: s3://test_bucket/some/words/my_file.csv" in caplog.text
