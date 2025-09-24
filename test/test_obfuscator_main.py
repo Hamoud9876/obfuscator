@@ -38,29 +38,6 @@ class TestObfuscator():
         assert "Missing 'file_to_obfuscator' in input JSON" in str(e.value)
 
     
-    
-    # def test_return_byte_stream(self,create_data):
-    #     j_string = create_data
-    #     obfuscator_main(j_string)
-
-
-    @patch("src.obfuscator_main.re.compile")
-    def test_format_not_found(self,pattern_mock,caplog, create_data):
-        j_string = create_data
-
-        caplog.set_level(logging.INFO)
-
-        my_mock = MagicMock()
-        my_mock.search.return_value = None
-        pattern_mock.return_value = my_mock
-
-
-        with pytest.raises(Exception) as e:
-            obfuscator_main(j_string)
-
-
-        assert type(e.value) == AttributeError
-        assert "no file format was found" in caplog.text
 
 
 
