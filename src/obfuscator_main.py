@@ -6,6 +6,7 @@ from src.obfuscator_json import obfuscator_json
 from src.obfuscator_csv import obfuscator_csv
 from src.obfuscator_parquet import obfuscator_parquet
 from utils.get_file_content import get_file_content
+from utils.extract_file_format import extract_file_format
 
 
 logging.basicConfig(
@@ -36,7 +37,8 @@ def obfuscator_main(json_str: str) -> BytesIO:
         }
 
     Return
-        Byte stream contaning the new obfuscatored file content
+        ByteStream contaning the new obfuscatored file content
+        or {"status": 400} if it fails
     """
 
     #dictionary of functions, if updated in the future
@@ -59,23 +61,21 @@ def obfuscator_main(json_str: str) -> BytesIO:
     if 'pii_fields' not in json_payload:
         raise ValueError("Missing 'pii_fields' in input JSON")
     
-    
-    #RegEx pattern to find any file format
-    pattern = re.compile(r"\.([a-zA-Z0-9]+)$")
-    match_ = pattern.search(json_payload['file_to_obfuscator'])
+    file_format = extract_file_format(json_payload)
 
-    ##ruling out AttributeError if no match found
-    if not match_:
-        logger.error(f"no file format was found")
-        raise AttributeError()
-
-    #fetching the file format from capture group
-    file_format = match_.group(1)
+    if file_format == None:
+        logger.error("Failed to retreive file format")
+        return {"status": 400}
 
 
     #retreiving file content
-    file_content = get_file_content()
+    file_content = get_file_content(
+        json_payload["file_to_be_obfuscater"]
+        )
     
+    if file_content == None:
+        logger.error("Failed to retreive file content")
+        return {"status": 400}
 
     #dynamically invoke a function from router dict
     if file_format in router:
