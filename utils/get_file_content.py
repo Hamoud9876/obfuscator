@@ -28,9 +28,8 @@ def get_file_content(flocation: str) -> Optional[StreamingBody]:
 
     #checking if the input is of type string
     if not isinstance(flocation,str):
-        logger.warning("wrong input type for 'flocation'")
+        logger.error("wrong input type for 'flocation'")
         return None
-
 
     
     #regex pattern, returns bucket name in group 1
@@ -41,7 +40,7 @@ def get_file_content(flocation: str) -> Optional[StreamingBody]:
     
     #ruling out AttributeError if no match found
     if not match_:
-        logger.warning(f"Invalid S3 URL: {flocation}")
+        logger.error(f"Invalid S3 URL: {flocation}")
         return None
 
 
@@ -63,7 +62,8 @@ def get_file_content(flocation: str) -> Optional[StreamingBody]:
 
 
     except Exception as e:
-        logger.error(f"Failed to retrieve S3 object {bucket}/{key}", exc_info=True)
+        logger.error(f"Failed to retrieve S3 object {bucket}/{key}", 
+                     exc_info=True)
         return None
 
 
