@@ -1,13 +1,11 @@
 import json
 import logging
 from io import BytesIO
-from src.obfuscator_json import obfuscator_json
-from src.obfuscator_csv import obfuscator_csv
-from src.obfuscator_parquet import obfuscator_parquet
 from utils.get_file_content import get_file_content
 from utils.extract_file_format import extract_file_format
 from utils.file_to_df import file_to_df
 from utils.redact_pii import redact_pii
+from utils.to_byte_stream import to_byte_stream
 
 
 logging.basicConfig(
@@ -41,15 +39,6 @@ def obfuscator_main(json_str: str) -> BytesIO:
         ByteStream contaning the new obfuscatored file content
         or {"status": 400} if it fails
     """
-
-    #dictionary of functions, if updated in the future
-    #make sure the key match the format
-    router = {
-        "csv": obfuscator_csv,
-        "json": obfuscator_json,
-        "parquet": obfuscator_parquet
-    }
-
 
     #loading the string into a dict to be processed by python
     json_payload = json.loads(json_str)
@@ -94,6 +83,10 @@ def obfuscator_main(json_str: str) -> BytesIO:
     
     df_redacted = redact_pii(df,json_payload["pii_fields"])
 
-    buffer = BytesIO(df_redacted)
+    final_output = to_byte_stream(df_redacted, file_format)
 
-    pass
+    if final_output == None:
+        logger.error("Failed to convert file to byte stream")
+        return {"status": 400}
+    
+    return final_output
