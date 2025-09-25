@@ -19,11 +19,11 @@ def create_data():
     buffer = io.StringIO()
     writer = csv.writer(buffer)
 
-    writer.writerow(["id","name","age","email","course"])
+    writer.writerow(["id", "name", "age", "email", "course"])
 
     courses = ["Math", "Physics", "History", "Biology", "Computer Science"]
 
-    for i in range(1,n+1):
+    for i in range(1, n + 1):
         name = fake.name()
         age = np.random.randint(18, 35)
         email = fake.email()
@@ -31,33 +31,32 @@ def create_data():
         writer.writerow([i, name, age, email, course])
 
     buffer.seek(0)
-    df =pd.read_csv(buffer)
+    df = pd.read_csv(buffer)
 
     pii_fields = ["name", "email"]
 
-    for field in  pii_fields:
+    for field in pii_fields:
         if field in df.columns:
-            df[field] = '***'
+            df[field] = "***"
 
     yield df
-
 
 
 @pytest.fixture(scope="function")
 def create_data_json():
     n = 50
 
-
     courses = ["Math", "Physics", "History", "Biology", "Computer Science"]
 
-
     data = [
-        {"id":i, 
-        "name":fake.name(), 
-        "age" : np.random.randint(18, 35),
-        "email" : fake.email(),
-        "course" : np.random.choice(courses)
-        } for i in range(1,n+1)
+        {
+            "id": i,
+            "name": fake.name(),
+            "age": np.random.randint(18, 35),
+            "email": fake.email(),
+            "course": np.random.choice(courses),
+        }
+        for i in range(1, n + 1)
     ]
 
     to_json = json.dumps(data)
@@ -65,16 +64,14 @@ def create_data_json():
     byte_body = to_json.encode("utf-8")
     byte_stream = io.BytesIO(byte_body)
 
-    df = pd.read_json(byte_stream, orient="records", lines=True)
+    df = pd.read_json(byte_stream, orient="records")
 
     pii_fields = ["name", "email"]
 
-    for field in  pii_fields:
+    for field in pii_fields:
         if field in df.columns:
-            df[field] = '***'
+            df[field] = "***"
     yield df
-
-
 
 
 @pytest.fixture(scope="function")
@@ -82,16 +79,18 @@ def create_data_parquet():
     n = 50
     courses = ["Math", "Physics", "History", "Biology", "Computer Science"]
 
-    df_original = pd.DataFrame([
-        {
-            "id": i,
-            "name": fake.name(),
-            "age": np.random.randint(18, 35),
-            "email": fake.email(),
-            "course": np.random.choice(courses)
-        }
-        for i in range(1, n+1)
-    ])
+    df_original = pd.DataFrame(
+        [
+            {
+                "id": i,
+                "name": fake.name(),
+                "age": np.random.randint(18, 35),
+                "email": fake.email(),
+                "course": np.random.choice(courses),
+            }
+            for i in range(1, n + 1)
+        ]
+    )
 
     buffer = io.BytesIO()
     df_original.to_parquet(buffer, index=False, engine="pyarrow")
@@ -132,9 +131,8 @@ def test_csv_error(to_csv_mock, create_data, caplog):
 
     response = to_byte_stream(df, "csv")
 
-
     assert response == None
-    assert 'Something went wrong ,' in caplog.text
+    assert "Something went wrong ," in caplog.text
 
 
 def test_return_byte_stream_json(create_data_json):
@@ -148,7 +146,7 @@ def test_convert_df_json(create_data_json):
     df = create_data_json
     response = to_byte_stream(df, "json")
 
-    df_response = pd.read_json(response, orient="records", lines=True)
+    df_response = pd.read_json(response, orient="records")
 
     assert df_response.equals(df)
 
@@ -162,10 +160,8 @@ def test_json_error(to_json_mock, create_data_json, caplog):
 
     response = to_byte_stream(df, "json")
 
-
     assert response == None
-    assert 'Something went wrong ,' in caplog.text
-
+    assert "Something went wrong ," in caplog.text
 
 
 def test_return_byte_stream_parquet(create_data_parquet):
@@ -193,7 +189,16 @@ def test_parquet_error(to_parquet_mock, create_data_parquet, caplog):
 
     response = to_byte_stream(df, "parquet")
 
+    assert response == None
+    assert "Something went wrong ," in caplog.text
+
+
+def test_no_match_format(create_data, caplog):
+    data = create_data
+
+    caplog.set_level(logging.INFO)
+
+    response = to_byte_stream(data, "fdf")
 
     assert response == None
-    assert 'Something went wrong ,' in caplog.text
-
+    assert "No Byte stream format matches fdf" in caplog.text
