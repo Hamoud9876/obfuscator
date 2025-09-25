@@ -5,23 +5,24 @@ import csv
 import io
 import pytest
 from utils.redact_pii import redact_pii
+import logging
 
 
 fake = Faker()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def create_data():
     n = 50
 
     buffer = io.StringIO()
     writer = csv.writer(buffer)
 
-    writer.writerow(["id","name","age","email","course"])
+    writer.writerow(["id", "name", "age", "email", "course"])
 
     courses = ["Math", "Physics", "History", "Biology", "Computer Science"]
 
-    for i in range(1,n+1):
+    for i in range(1, n + 1):
         name = fake.name()
         age = np.random.randint(18, 35)
         email = fake.email()
@@ -29,7 +30,7 @@ def create_data():
         writer.writerow([i, name, age, email, course])
 
     buffer.seek(0)
-    df =pd.read_csv(buffer)
+    df = pd.read_csv(buffer)
 
     pii_fields = ["name", "email"]
 
@@ -39,7 +40,7 @@ def create_data():
 def test_mutability(create_data):
     df, pii_fields = create_data
 
-    reponse = redact_pii(df,pii_fields)
+    reponse = redact_pii(df, pii_fields)
 
     assert reponse is not df
 
@@ -47,14 +48,25 @@ def test_mutability(create_data):
 def test_return_df(create_data):
     df, pii_fields = create_data
 
-    reponse = redact_pii(df,pii_fields)
+    reponse = redact_pii(df, pii_fields)
 
     assert isinstance(reponse, pd.DataFrame)
+
 
 def test_redact_pii(create_data):
     df, pii_fields = create_data
 
-    reponse = redact_pii(df,pii_fields)
+    reponse = redact_pii(df, pii_fields)
 
     for field in pii_fields:
-        assert reponse[field].loc[np.random.randint(0,9)] == '***'
+        assert reponse[field].loc[np.random.randint(0, 9)] == "***"
+
+
+def test_column_not_found(create_data, caplog):
+    df, pii_fields = create_data
+
+    caplog.set_level(logging.INFO)
+
+    reponse = redact_pii(df, ["Not"])
+
+    assert "pii field: Not was not found" in caplog.text
