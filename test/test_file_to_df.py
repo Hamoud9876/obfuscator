@@ -4,7 +4,7 @@ import csv
 from botocore.response import StreamingBody
 import pandas as pd
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import logging
 
 
@@ -12,8 +12,8 @@ class TestUnit:
     def test_reads_csv(self):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
-        writer.writerow(["id","name","age"])
-        writer.writerow([1,"James", 25])
+        writer.writerow(["id", "name", "age"])
+        writer.writerow([1, "James", 25])
         writer.writerow([2, "Hamoud", 30])
 
         body_bytes = buffer.getvalue().encode("utf-8")
@@ -21,7 +21,6 @@ class TestUnit:
         byte_stream = io.BytesIO(body_bytes)
 
         streaming_body = StreamingBody(byte_stream, len(body_bytes))
-
 
         response = file_to_df(streaming_body, "csv")
 
@@ -30,8 +29,8 @@ class TestUnit:
     def test_csv_df_correct_structure(self):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
-        writer.writerow(["id","name","age"])
-        writer.writerow([1,"James", 25])
+        writer.writerow(["id", "name", "age"])
+        writer.writerow([1, "James", 25])
         writer.writerow([2, "Hamoud", 30])
 
         body_bytes = buffer.getvalue().encode("utf-8")
@@ -39,20 +38,18 @@ class TestUnit:
         byte_stream = io.BytesIO(body_bytes)
 
         streaming_body = StreamingBody(byte_stream, len(body_bytes))
-
 
         response = file_to_df(streaming_body, "csv")
 
         assert "id" in response.columns
-        assert "name" in  response.columns
+        assert "name" in response.columns
         assert "age" in response.columns
-
 
     def test_csv_df_correct_data(self):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
-        writer.writerow(["id","name","age"])
-        writer.writerow([1,"James", 25])
+        writer.writerow(["id", "name", "age"])
+        writer.writerow([1, "James", 25])
         writer.writerow([2, "Hamoud", 30])
 
         body_bytes = buffer.getvalue().encode("utf-8")
@@ -60,7 +57,6 @@ class TestUnit:
         byte_stream = io.BytesIO(body_bytes)
 
         streaming_body = StreamingBody(byte_stream, len(body_bytes))
-
 
         response = file_to_df(streaming_body, "csv")
 
@@ -71,13 +67,12 @@ class TestUnit:
         assert response["name"].loc[1] == "Hamoud"
         assert response["age"].loc[1] == 30
 
-
     @patch("utils.file_to_df.pd")
-    def test_csv_raises_error(self,pd_mock, caplog):
+    def test_csv_raises_error(self, pd_mock, caplog):
         buffer = io.StringIO()
         writer = csv.writer(buffer)
-        writer.writerow(["id","name","age"])
-        writer.writerow([1,"James", 25])
+        writer.writerow(["id", "name", "age"])
+        writer.writerow([1, "James", 25])
         writer.writerow([2, "Hamoud", 30])
 
         body_bytes = buffer.getvalue().encode("utf-8")
@@ -94,12 +89,12 @@ class TestUnit:
         assert response == None
         assert "Something went wrong " in caplog.text
 
-
     def test_reads_json(self):
-        data = [{"id": 1, "name": "James", "age": 25},
-                {"id": 2, "name": "Hamoud", "age": 30}
-                ]
-        
+        data = [
+            {"id": 1, "name": "James", "age": 25},
+            {"id": 2, "name": "Hamoud", "age": 30},
+        ]
+
         to_json = json.dumps(data)
 
         byte_body = to_json.encode("utf-8")
@@ -111,12 +106,12 @@ class TestUnit:
 
         assert isinstance(response, pd.DataFrame)
 
-
     def test_json_df_correct_structure(self):
-        data = [{"id": 1, "name": "James", "age": 25},
-                {"id": 2, "name": "Hamoud", "age": 30}
-                ]
-        
+        data = [
+            {"id": 1, "name": "James", "age": 25},
+            {"id": 2, "name": "Hamoud", "age": 30},
+        ]
+
         to_json = json.dumps(data)
 
         byte_body = to_json.encode("utf-8")
@@ -127,14 +122,15 @@ class TestUnit:
         response = file_to_df(streaming_body, "json")
 
         assert "id" in response.columns
-        assert "name" in  response.columns
+        assert "name" in response.columns
         assert "age" in response.columns
 
     def test_json_df_correct_data(self):
-        data = [{"id": 1, "name": "James", "age": 25},
-                {"id": 2, "name": "Hamoud", "age": 30}
-                ]
-        
+        data = [
+            {"id": 1, "name": "James", "age": 25},
+            {"id": 2, "name": "Hamoud", "age": 30},
+        ]
+
         to_json = json.dumps(data)
 
         byte_body = to_json.encode("utf-8")
@@ -151,13 +147,13 @@ class TestUnit:
         assert response["name"].loc[1] == "Hamoud"
         assert response["age"].loc[1] == 30
 
-    
     @patch("utils.file_to_df.pd")
-    def test_json_raises_error(self,pd_mock, caplog):
-        data = [{"id": 1, "name": "James", "age": 25},
-                {"id": 2, "name": "Hamoud", "age": 30}
-                ]
-        
+    def test_json_raises_error(self, pd_mock, caplog):
+        data = [
+            {"id": 1, "name": "James", "age": 25},
+            {"id": 2, "name": "Hamoud", "age": 30},
+        ]
+
         to_json = json.dumps(data)
 
         byte_body = to_json.encode("utf-8")
@@ -175,16 +171,17 @@ class TestUnit:
         assert response == None
         assert "Something went wrong " in caplog.text
 
-
     def test_reads_parquet(self):
-        df = pd.DataFrame([
-        {"id": 1, "name": "James", "age": 25},
-        {"id": 2, "name": "Hamoud", "age": 30}
-    ])
-        
+        df = pd.DataFrame(
+            [
+                {"id": 1, "name": "James", "age": 25},
+                {"id": 2, "name": "Hamoud", "age": 30},
+            ]
+        )
+
         buffer = io.BytesIO()
 
-        df.to_parquet(buffer, engine='pyarrow', index=False)
+        df.to_parquet(buffer, engine="pyarrow", index=False)
 
         buffer.seek(0)
         streaming_body = StreamingBody(buffer, len(buffer.getvalue()))
@@ -194,14 +191,16 @@ class TestUnit:
         assert isinstance(response, pd.DataFrame)
 
     def test_parquet_df_correct_structure(self):
-        df = pd.DataFrame([
-        {"id": 1, "name": "James", "age": 25},
-        {"id": 2, "name": "Hamoud", "age": 30}
-    ])
-        
+        df = pd.DataFrame(
+            [
+                {"id": 1, "name": "James", "age": 25},
+                {"id": 2, "name": "Hamoud", "age": 30},
+            ]
+        )
+
         buffer = io.BytesIO()
 
-        df.to_parquet(buffer, engine='pyarrow', index=False)
+        df.to_parquet(buffer, engine="pyarrow", index=False)
 
         buffer.seek(0)
         streaming_body = StreamingBody(buffer, len(buffer.getvalue()))
@@ -209,19 +208,20 @@ class TestUnit:
         response = file_to_df(streaming_body, "parquet")
 
         assert "id" in response.columns
-        assert "name" in  response.columns
+        assert "name" in response.columns
         assert "age" in response.columns
 
-
     def test_parquet_df_correct_data(self):
-        df = pd.DataFrame([
-        {"id": 1, "name": "James", "age": 25},
-        {"id": 2, "name": "Hamoud", "age": 30}
-    ])
-        
+        df = pd.DataFrame(
+            [
+                {"id": 1, "name": "James", "age": 25},
+                {"id": 2, "name": "Hamoud", "age": 30},
+            ]
+        )
+
         buffer = io.BytesIO()
 
-        df.to_parquet(buffer, engine='pyarrow', index=False)
+        df.to_parquet(buffer, engine="pyarrow", index=False)
 
         buffer.seek(0)
         streaming_body = StreamingBody(buffer, len(buffer.getvalue()))
@@ -235,17 +235,18 @@ class TestUnit:
         assert response["name"].loc[1] == "Hamoud"
         assert response["age"].loc[1] == 30
 
-
     @patch("utils.file_to_df.pd")
-    def test_parquet_raises_error(self,pd_mock, caplog):
-        df = pd.DataFrame([
-        {"id": 1, "name": "James", "age": 25},
-        {"id": 2, "name": "Hamoud", "age": 30}
-    ])
-        
+    def test_parquet_raises_error(self, pd_mock, caplog):
+        df = pd.DataFrame(
+            [
+                {"id": 1, "name": "James", "age": 25},
+                {"id": 2, "name": "Hamoud", "age": 30},
+            ]
+        )
+
         buffer = io.BytesIO()
 
-        df.to_parquet(buffer, engine='pyarrow', index=False)
+        df.to_parquet(buffer, engine="pyarrow", index=False)
 
         buffer.seek(0)
         streaming_body = StreamingBody(buffer, len(buffer.getvalue()))
@@ -259,3 +260,11 @@ class TestUnit:
 
         assert response == None
         assert "Something went wrong " in caplog.text
+
+    def test_no_format_match(self, caplog):
+        caplog.set_level(logging.INFO)
+
+        response = file_to_df("", "dfd")
+
+        assert response == None
+        assert "The provided format doesn't match" in caplog.text
