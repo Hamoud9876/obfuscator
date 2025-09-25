@@ -35,7 +35,7 @@ def file_to_df(file_body, format: str) -> pd.DataFrame:
             case "csv":
                 df = pd.read_csv(file_body)
             case "json":
-                df = pd.read_json(file_body)
+                df = pd.read_json(file_body,orient="records", lines=True)
             case "parquet":
                 buffer = io.BytesIO(file_body.read())
                 df = pd.read_parquet(buffer, engine="pyarrow")
