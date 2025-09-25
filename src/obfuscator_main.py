@@ -1,5 +1,4 @@
 import json
-import re
 import logging
 from io import BytesIO
 from src.obfuscator_json import obfuscator_json
@@ -7,6 +6,8 @@ from src.obfuscator_csv import obfuscator_csv
 from src.obfuscator_parquet import obfuscator_parquet
 from utils.get_file_content import get_file_content
 from utils.extract_file_format import extract_file_format
+from utils.file_to_df import file_to_df
+from utils.redact_pii import redact_pii
 
 
 logging.basicConfig(
@@ -61,8 +62,10 @@ def obfuscator_main(json_str: str) -> BytesIO:
     if 'pii_fields' not in json_payload:
         raise ValueError("Missing 'pii_fields' in input JSON")
     
+    #extracting the file format from the s3 url
     file_format = extract_file_format(json_payload)
 
+    #checking if we got None
     if file_format == None:
         logger.error("Failed to retreive file format")
         return {"status": 400}
@@ -73,17 +76,24 @@ def obfuscator_main(json_str: str) -> BytesIO:
         json_payload["file_to_be_obfuscater"]
         )
     
+
+    #checking if we not get None
     if file_content == None:
         logger.error("Failed to retreive file content")
         return {"status": 400}
-
-    #dynamically invoke a function from router dict
-    if file_format in router:
-        router[file_format]()
-
     
 
+    #turning the file content into df
+    df = file_to_df(file_content)
 
 
+    #checking if we not get None
+    if df == None:
+        logger.error("Failed to convert file content to df")
+        return {"status": 400}
+    
+    df_redacted = redact_pii(df,json_payload["pii_fields"])
+
+    buffer = BytesIO(df_redacted)
 
     pass
