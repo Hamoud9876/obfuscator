@@ -1,4 +1,4 @@
-from obfuscate_main import obfuscator_main
+from src.obfuscate_main import obfuscator_main
 import pytest
 from unittest.mock import patch
 import logging
@@ -141,11 +141,11 @@ class TestObfuscateUnitTest:
         assert "Missing 'file_to_obfuscate' in input JSON" in str(e.value)
 
     # 2
-    @patch("src.obfuscator_main.to_byte_stream")
-    @patch("src.obfuscator_main.redact_pii")
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.to_byte_stream")
+    @patch("src.obfuscate_main.redact_pii")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_exctract_fomrat(
         self,
         mock_ext_file,
@@ -169,7 +169,7 @@ class TestObfuscateUnitTest:
         mock_ext_file.assert_called_with("s3://test_bucket/my_file.csv")
 
     # 3
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_exctract_format_error(self, mock_ext_file, caplog, create_data):
         mock_ext_file.return_value = None
 
@@ -184,11 +184,11 @@ class TestObfuscateUnitTest:
         assert "Failed to retreive file format" in caplog.text
 
     # 4
-    @patch("src.obfuscator_main.to_byte_stream")
-    @patch("src.obfuscator_main.redact_pii")
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.to_byte_stream")
+    @patch("src.obfuscate_main.redact_pii")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_get_content(
         self,
         mock_ext_file,
@@ -225,8 +225,8 @@ class TestObfuscateUnitTest:
         mock_file_content.assert_called_with("s3://test_bucket/my_file.csv")
 
     # 5
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_get_content_error(
         self, mock_ext_file, mock_file_content, caplog, create_data
     ):
@@ -244,11 +244,11 @@ class TestObfuscateUnitTest:
         assert "Failed to retreive file content" in caplog.text
 
     # 6
-    @patch("src.obfuscator_main.to_byte_stream")
-    @patch("src.obfuscator_main.redact_pii")
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.to_byte_stream")
+    @patch("src.obfuscate_main.redact_pii")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_file_to_df(
         self,
         mock_ext_file,
@@ -286,9 +286,9 @@ class TestObfuscateUnitTest:
         mock_file_to_df.assert_called_with(streaming_body, "csv")
 
     # 7
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_file_to_df_error(
         self,
         mock_ext_file,
@@ -312,11 +312,11 @@ class TestObfuscateUnitTest:
         assert "Failed to convert file content to df" in caplog.text
 
     # 8
-    @patch("src.obfuscator_main.to_byte_stream")
-    @patch("src.obfuscator_main.redact_pii")
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.to_byte_stream")
+    @patch("src.obfuscate_main.redact_pii")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_redact_pii(
         self,
         mock_ext_file,
@@ -353,11 +353,11 @@ class TestObfuscateUnitTest:
         mock_redact_pii.assert_called_once()
         mock_redact_pii.assert_called_with(df, ["name", "id", "email"])
 
-    @patch("src.obfuscator_main.to_byte_stream")
-    @patch("src.obfuscator_main.redact_pii")
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.to_byte_stream")
+    @patch("src.obfuscate_main.redact_pii")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_byte_stream(
         self,
         mock_ext_file,
@@ -396,11 +396,11 @@ class TestObfuscateUnitTest:
         mock_byte_stream.assert_called_with(df2, "csv")
 
     # 10
-    @patch("src.obfuscator_main.to_byte_stream")
-    @patch("src.obfuscator_main.redact_pii")
-    @patch("src.obfuscator_main.file_to_df")
-    @patch("src.obfuscator_main.get_file_content")
-    @patch("src.obfuscator_main.extract_file_format")
+    @patch("src.obfuscate_main.to_byte_stream")
+    @patch("src.obfuscate_main.redact_pii")
+    @patch("src.obfuscate_main.file_to_df")
+    @patch("src.obfuscate_main.get_file_content")
+    @patch("src.obfuscate_main.extract_file_format")
     def test_byte_stream_error(
         self,
         mock_ext_file,
