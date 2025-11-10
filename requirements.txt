@@ -5,3 +5,4 @@ moto==5.1.13
 numpy==2.3.3
 pandas==2.3.2
 pytest==8.4.2
+pyarrow==21.0.0
